@@ -25,12 +25,14 @@ module mem_ctrl(
 	
 	//interact with ram
 	input wire [7:0]ram_in,
+	input wire io_buffer_full,
 	
 	output wire[7:0]ram_out,
 	output wire[`InstAddrBus] ram_addr,
 	output wire ram_wr//write=1 read=0
 );
 wire[31:0] addr;
+wire wr;
 reg[7:0] ldata[3:0];
 wire[7:0] sdata[3:0];
 reg[2:0] counter;
@@ -43,8 +45,9 @@ assign sdata[3]=mem_data[31:24];
 
 assign length=mem_require?mem_length[2:0]:(inst_require?4:0);
 assign addr=mem_require?mem_addr[31:0]:inst_addr[31:0];
-assign ram_wr=mem_require?(counter==length?`False:mem_wr):`False;
-assign ram_addr=addr+counter;
+assign wr=mem_require?(counter==length?`False:mem_wr):`False;
+assign ram_wr=io_buffer_full?`False:wr;
+assign ram_addr=(io_buffer_full&&wr)?`ZeroWord:addr+counter;
 assign ram_out=(counter==3'b100)?`ZeroWord:sdata[counter];
 
 always @(posedge clk)begin
@@ -58,7 +61,7 @@ always @(posedge clk)begin
 		ldata[1]<=0;
 		ldata[2]<=0;
 		ldata[3]<=0;
-	end else if(length&&!ram_wr)begin
+	end else if(length&&!wr)begin
 		if(counter==0)begin
 			inst_busy<=mem_require;
 			mem_busy<=!mem_require;
@@ -84,19 +87,21 @@ always @(posedge clk)begin
 			end
 			counter<=0;
 		end
-	end else if(length&&ram_wr)begin
+	end else if(length&&wr)begin
 		if(counter==0)begin
 			inst_busy<=`True;
 			mem_busy<=`False;
 			inst_enable<=`False;
 			mem_enable<=`False;
 		end
+    if(!io_buffer_full)begin
 		if(counter+1==length)begin
 			mem_enable<=`True;
 			counter<=0;
 		end else begin
 			counter<=counter+1;
 		end
+	 end
 	end else begin
 		mem_busy<=`False;
 		inst_busy<=`False;

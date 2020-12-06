@@ -4,7 +4,7 @@ module id_ex(
 	
 	//recieve from id
 	input wire[`AluOpBus] id_aluop,
-	input wire[`AluOpBus] id_alusel,
+	input wire[`AluSelBus] id_alusel,
 	input wire[`RegBus] id_reg1,
 	inout wire[`RegBus] id_reg2,
 	input wire[`RegAddrBus] id_wd,
@@ -19,7 +19,7 @@ module id_ex(
 	
 	//send to ex
 	output reg[`AluOpBus] ex_aluop,
-	output reg[`AluOpBus] ex_alusel,
+	output reg[`AluSelBus] ex_alusel,
 	output reg[`RegBus] ex_reg1,
 	output reg[`RegBus] ex_reg2,
 	output reg[`RegAddrBus] ex_wd,

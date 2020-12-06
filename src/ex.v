@@ -180,7 +180,7 @@ end
 //Arithmetic
 always @(*) begin
 	if(rst==`RstEnable) begin
-		arithout<=`ZeroWord;
+		arithout=`ZeroWord;
 	end else begin
 		case (aluop_i)
 			`EX_ADD:begin

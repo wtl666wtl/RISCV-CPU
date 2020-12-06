@@ -253,7 +253,7 @@ mem_ctrl mem_ctrl0(.clk(clk_in),.rst(rst),
 		.mem_data(mc_mem_data_i),.mem_enable(mc_mem_enable),
 		.mem_data_o(mc_mem_data_o),.mem_busy(mc_mem_busy),
 		.ram_in(mem_din),.ram_out(mem_dout),
-		.ram_addr(mem_a),.ram_wr(mem_wr));
+		.ram_addr(mem_a),.ram_wr(mem_wr),.io_buffer_full(io_buffer_full));
 
 //stall_ctrl
 ctrl ctrl0(.rst(rst),
