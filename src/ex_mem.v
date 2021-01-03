@@ -1,7 +1,7 @@
 module ex_mem(
 	input wire clk,
 	input wire rst,
-	
+	input wire rdy,
 	//recieve from ex
 	input wire[`RegAddrBus] ex_wd,
 	input wire ex_wreg,
@@ -27,7 +27,7 @@ always @(posedge clk)begin
 		mem_wdata<=`ZeroWord;
 		mem_mem_addr<=`ZeroWord;
 		mem_aluop<=`EX_NOP;
-	end else if(stall[4]==`NoStop) begin
+	end else if(rdy&&tall[4]==`NoStop) begin
 		mem_wd<=ex_wd;
 		mem_wreg<=ex_wreg;
 		mem_wdata<=ex_wdata;

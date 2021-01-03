@@ -1,7 +1,7 @@
 module predictor(
 	input wire clk,
 	input wire rst,
-	
+	input wire rdy,
 	input wire[`InstAddrBus] pc_if,
 	
 	output reg pre_jmp_status,
@@ -23,7 +23,7 @@ always @(posedge clk)begin
 			tag[i][`ValidBit]<=`InstInvalid;
 			pre[i]<=2'b10;
 		end
-	end else if(opt_is_jmp==`True)begin
+	end else if(rdy&&opt_is_jmp==`True)begin
 		if(jmp_res==`True)begin
 			tag[pc_ex[`IndexBus]]<=pc_ex[`TagBits];
 			target[pc_ex[`IndexBus]]<=ifjmp_target;
@@ -44,12 +44,14 @@ always @(*)begin
 	if(rst==`RstEnable)begin
 		pre_jmp_status=`False;
 		pre_jmp_target=`ZeroWord;
-	end else if(tag[pc_if[`IndexBus]]==pc_if[`TagBits]&&pre[pc_if[`IndexBus]][1]==`True)begin
-		pre_jmp_status=`True;
-		pre_jmp_target=target[pc_if[`IndexBus]];
-	end else begin
-		pre_jmp_status=`False;
-		pre_jmp_target=`ZeroWord;
+	end else if(rdy)begin
+		if(tag[pc_if[`IndexBus]]==pc_if[`TagBits]&&pre[pc_if[`IndexBus]][1]==`True)begin
+			pre_jmp_status=`True;
+			pre_jmp_target=target[pc_if[`IndexBus]];
+		end else begin
+			pre_jmp_status=`False;
+			pre_jmp_target=`ZeroWord;
+		end
 	end
 end
 endmodule

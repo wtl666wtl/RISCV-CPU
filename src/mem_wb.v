@@ -1,7 +1,7 @@
 module mem_wb(
 	input wire clk,
 	input wire rst,
-	
+	input wire rdy,
 	//recieve from mem
 	input wire[`RegAddrBus] mem_wd,
 	input wire mem_wreg,
@@ -19,14 +19,16 @@ always @(posedge clk)begin
 		wb_wd<=`NOPRegAddr;
 		wb_wreg<=`WriteDisable;
 		wb_wdata<=`ZeroWord;
-	end else if(stall[4]==`Stop) begin
-		wb_wd<=`NOPRegAddr;
-		wb_wreg<=`WriteDisable;
-		wb_wdata<=`ZeroWord;
-	end else begin
-		wb_wd<=mem_wd;
-		wb_wreg<=mem_wreg;
-		wb_wdata<=mem_wdata;
+	end else if(rdy)begin
+		if(stall[4]==`Stop) begin
+			wb_wd<=`NOPRegAddr;
+			wb_wreg<=`WriteDisable;
+			wb_wdata<=`ZeroWord;
+		end else begin
+			wb_wd<=mem_wd;
+			wb_wreg<=mem_wreg;
+			wb_wdata<=mem_wdata;
+		end
 	end
 end
 endmodule

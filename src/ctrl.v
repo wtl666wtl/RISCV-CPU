@@ -1,5 +1,6 @@
 module ctrl(
 	input wire rst,
+	input wire rdy,
 	input wire if_stall,
 	input wire id_stall,
 	input wire mem_stall,
@@ -9,14 +10,16 @@ module ctrl(
 always @(*) begin
 	if(rst==`RstEnable) begin
 		stall=`AllStall;
-	end else if(mem_stall==`Stop)begin
-		stall=`MemStall;
-	end else if(id_stall==`Stop)begin
-		stall=`IdStall;
-	end else if(if_stall==`Stop)begin
-		stall=`IfStall;	
-	end else begin
-		stall=`NoStall;
+	end else if(rdy) begin
+		if(mem_stall==`Stop)begin
+			stall=`MemStall;
+		end else if(id_stall==`Stop)begin
+			stall=`IdStall;
+		end else if(if_stall==`Stop)begin
+			stall=`IfStall;	
+		end else begin
+			stall=`NoStall;
+		end
 	end
 end
 endmodule

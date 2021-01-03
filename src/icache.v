@@ -1,7 +1,7 @@
 module icache(
 	input wire rst,
 	input wire clk,
-	
+	input wire rdy,
 	//recieve from mem_ctrl
 	input wire inst_busy,
 	input wire inst_enable_i,
@@ -29,7 +29,7 @@ always @(posedge clk)begin
 		for(i=0;i<`IndexSize;i=i+1)begin
 			tag[i][`ValidBit]<=`InstInvalid;
 		end
-	end else if(inst_enable_i==`True) begin
+	end else if(rdy&&inst_enable_i==`True) begin
 		tag[inst_addr_i[`IndexBus]]<=inst_addr_i[`TagBits];
 		data[inst_addr_i[`IndexBus]]<=inst_data_i;
 	end
@@ -40,22 +40,24 @@ always @(*) begin
 		inst_require_o=`False;
 		inst_enable_o=`False;
 		inst_data_o=`ZeroWord;
-	end else if(tag[inst_addr_i[`IndexBus]]==inst_addr_i[`TagBits])begin
-		inst_enable_o=`True;
-		inst_data_o=data[inst_addr_i[`IndexBus]];
-		inst_require_o=`False;
-	end else if(inst_enable_i==`True)begin
-		inst_enable_o=`True;
-		inst_data_o=inst_data_i;
-		inst_require_o=`False;
-	end else if(!inst_busy)begin
-		inst_enable_o=`False;
-		inst_data_o=`ZeroWord;
-		inst_require_o=`True;
-	end else begin
-		inst_require_o=`False;
-		inst_enable_o=`False;
-		inst_data_o=`ZeroWord;
+	end else if(rdy)begin
+		if(tag[inst_addr_i[`IndexBus]]==inst_addr_i[`TagBits])begin
+			inst_enable_o=`True;
+			inst_data_o=data[inst_addr_i[`IndexBus]];
+			inst_require_o=`False;
+		end else if(inst_enable_i==`True)begin
+			inst_enable_o=`True;
+			inst_data_o=inst_data_i;
+			inst_require_o=`False;
+		end else if(!inst_busy)begin
+			inst_enable_o=`False;
+			inst_data_o=`ZeroWord;
+			inst_require_o=`True;
+		end else begin
+			inst_require_o=`False;
+			inst_enable_o=`False;
+			inst_data_o=`ZeroWord;
+		end
 	end
 end
 

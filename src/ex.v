@@ -1,5 +1,6 @@
 module ex(
 	input wire rst,
+	input wire rdy,
 	
 	input wire[`InstAddrBus] pc_i,
 	input wire jmp_status_i,
@@ -44,7 +45,7 @@ always @(*) begin
 		jmp_target_o=`ZeroWord;
 		opt_is_jmp=`False;
 		jmp_res=`False;
-	end else begin
+	end else if(rdy) begin
 		jmp_wrong_o=`False;
 		jmp_target_o=`ZeroWord;
 		opt_is_jmp=`False;
@@ -136,7 +137,7 @@ end
 always @(*) begin
 	if(rst==`RstEnable) begin
 		logicout=`ZeroWord;
-	end else begin
+	end else if(rdy) begin
 		case (aluop_i)
 			`EX_OR:begin
 				logicout=reg1_i|reg2_i;
@@ -181,7 +182,7 @@ end
 always @(*) begin
 	if(rst==`RstEnable) begin
 		arithout=`ZeroWord;
-	end else begin
+	end else if(rdy) begin
 		case (aluop_i)
 			`EX_ADD:begin
 				arithout=reg1_i+reg2_i;
@@ -211,7 +212,7 @@ always @(*) begin
 	if(rst==`RstEnable)begin
 		mem_addr_o=`ZeroWord;
 		load_status=`False;
-	end else begin
+	end else if(rdy) begin
 		case(aluop_i)
 			`EX_SH,`EX_SB,`EX_SW:begin
 				mem_addr_o=reg1_i+offset_i;
@@ -231,12 +232,12 @@ end
 
 //result
 always @(*) begin
-	if(rst==`RstEnable||wreg_i==`True&&wd_i==`NOPRegAddr)begin
+	if(rst==`RstEnable||rdy&&wreg_i==`True&&wd_i==`NOPRegAddr)begin
 		wd_o=`NOPRegAddr;
 		wreg_o=`False;
 		wdata_o=`ZeroWord;
 		aluop_o=`EX_NOP;
-	end else begin
+	end else if(rdy) begin
 		wd_o=wd_i;
 		wreg_o=wreg_i;
 		case(alusel_i)

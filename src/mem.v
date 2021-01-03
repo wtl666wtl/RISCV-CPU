@@ -1,6 +1,6 @@
 module mem(
 	input wire rst,
-	
+	input wire rdy,
 	//recieve from ex_mem
 	input wire[`RegAddrBus] wd_i,
 	input wire wreg_i,
@@ -38,7 +38,7 @@ always @(*) begin
 		wd_o=`NOPRegAddr;
 		wreg_o=`WriteDisable;
 		wdata_o=`ZeroWord;
-	end else begin
+	end else if(rdy) begin
 		mem_require_o=`False;
    		mem_wr_o=`False;
   	 	mem_data_o=`ZeroWord;

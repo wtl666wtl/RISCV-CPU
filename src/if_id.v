@@ -1,6 +1,7 @@
 module if_id(
 	input wire clk,
 	input wire rst,
+	input wire rdy,
 	input wire[`StallBus] stall,
 	input wire[`InstAddrBus] if_pc,
 	input wire[`InstBus] if_inst,
@@ -14,7 +15,7 @@ module if_id(
 		if(rst==`RstEnable)begin
 			id_pc<=`ZeroWord;
 			id_inst<=`ZeroWord;
-		end else if(stall[2]==`NoStop)begin
+		end else if(rdy&&stall[2]==`NoStop)begin
 			if(ex_jmp_wrong_i)begin
 				id_pc<=`ZeroWord;
 				id_inst<=`ZeroWord;

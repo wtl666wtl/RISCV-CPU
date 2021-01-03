@@ -1,7 +1,7 @@
 module id_ex(
 	input wire clk,
 	input wire rst,
-	
+	input wire rdy,
 	//recieve from id
 	input wire[`AluOpBus] id_aluop,
 	input wire[`AluSelBus] id_alusel,
@@ -40,7 +40,7 @@ always @(posedge clk)begin
 		ex_pc<=`ZeroWord;
 		offset_o<=`ZeroWord;
 		jmp_status_o<=`False;
-	end else if(stall[3]==`NoStop)begin
+	end else if(rdy&&stall[3]==`NoStop)begin
 		if(ex_jmp_wrong_i==`True)begin
 			ex_aluop<=`EX_NOP;
 			ex_alusel<=`EX_RES_NOP;

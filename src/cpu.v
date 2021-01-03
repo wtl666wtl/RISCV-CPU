@@ -29,9 +29,10 @@ module cpu(
 // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
 
-//rst
 wire rst;
-assign rst=rst_in|(~rdy_in);
+wire rdy;
+assign rst=rst_in;
+assign rdy=rdy_in;
 
 //pc
 wire[`InstAddrBus] pc;
@@ -143,31 +144,31 @@ wire[`RegBus] mc_mem_data_i;
 wire[2:0] mc_mem_length;
 
 //regfile
-regfile regfile0(.clk(clk_in),.rst(rst),
+regfile regfile0(.clk(clk_in),.rst(rst),.rdy(rdy),
 		.we(wb_wreg_i),.waddr(wb_wd_i),.wdata(wb_wdata_i),
 		.re1(reg1_read),.raddr1(reg1_addr),.rdata1(reg1_data),
 		.re2(reg2_read),.raddr2(reg2_addr),.rdata2(reg2_data));
 
 //predictor
-predictor predictor0(.clk(clk_in),.rst(rst),
+predictor predictor0(.clk(clk_in),.rst(rst),.rdy(rdy),
 		.pc_if(pc),.pre_jmp_status(pre_jmp_status),
 		.pre_jmp_target(pre_jmp_target),
 		.pc_ex(ex_pc),.opt_is_jmp(opt_is_jmp),
 		.ifjmp_target(ifjmp_target),.jmp_res(jmp_res));
 
 //pc_reg
-pc_reg pc_reg0(.clk(clk_in),.rst(rst),.stall(stall),
+pc_reg pc_reg0(.clk(clk_in),.rst(rst),.stall(stall),.rdy(rdy),
 		.ex_jmp_wrong_i(ex_jmp_wrong),.ex_jmp_target_i(ex_jmp_target),
 		.pre_jmp_status(pre_jmp_status),.pre_jmp_target(pre_jmp_target),
 		.pc(pc),.jmp_status(id_jmp_status_i));
 
 //if
-IF if0(.rst(rst),.pc_i(pc),.pc_o(if_pc),.inst_o(if_inst),
+IF if0(.rst(rst),.pc_i(pc),.pc_o(if_pc),.inst_o(if_inst),.rdy(rdy),
 		.inst_enable_i(icache_inst_enable),.inst_data_i(icache_inst_data),
 		.inst_addr_o(icache_inst_addr),.if_stall(if_stall));
 		
 //icache
-icache icache0(.clk(clk_in),.rst(rst),
+icache icache0(.clk(clk_in),.rst(rst),.rdy(rdy),
 		.inst_busy(mc_inst_busy),.inst_enable_i(mc_inst_enable),
 		.inst_data_i(mc_inst_data),
 		.inst_require_o(mc_inst_require),.inst_addr_o(mc_inst_addr),
@@ -175,12 +176,12 @@ icache icache0(.clk(clk_in),.rst(rst),
 		.inst_data_o(icache_inst_data));
 
 //if_id
-if_id if_id0(.clk(clk_in),.rst(rst),.stall(stall),
+if_id if_id0(.clk(clk_in),.rst(rst),.stall(stall),.rdy(rdy),
 		.if_pc(if_pc),.if_inst(if_inst),.ex_jmp_wrong_i(ex_jmp_wrong),
 		.id_pc(id_pc_i),.id_inst(id_inst_i));
 		
 //id
-id id0(.rst(rst),.pc_i(id_pc_i),.inst_i(id_inst_i),.jmp_status_i(id_jmp_status_i),
+id id0(.rst(rst),.pc_i(id_pc_i),.inst_i(id_inst_i),.jmp_status_i(id_jmp_status_i),.rdy(rdy),
 		.reg1_data_i(reg1_data),.reg2_data_i(reg2_data),.ex_ld_status(ex_ld_status),
 		.ex_wreg_i(ex_wreg_o),.ex_wdata_i(ex_wdata_o),.ex_wd_i(ex_wd_o),
 		.mem_wreg_i(mem_wreg_o),.mem_wdata_i(mem_wdata_o),.mem_wd_i(mem_wd_o),
@@ -193,7 +194,7 @@ id id0(.rst(rst),.pc_i(id_pc_i),.inst_i(id_inst_i),.jmp_status_i(id_jmp_status_i
 		.offset_o(id_offset),.id_stall(id_stall));
 
 //id_ex
-id_ex id_ex0(.clk(clk_in),.rst(rst),
+id_ex id_ex0(.clk(clk_in),.rst(rst),.rdy(rdy),
 		.id_aluop(id_aluop_o),.id_alusel(id_alusel_o),
 		.id_reg1(id_reg1_o),.id_reg2(id_reg2_o),
 		.id_wd(id_wd_o),.id_wreg(id_wreg_o),
@@ -207,7 +208,7 @@ id_ex id_ex0(.clk(clk_in),.rst(rst),
 		.jmp_status_o(ex_jmp_status));
 
 //ex
-ex ex0(.rst(rst),
+ex ex0(.rst(rst),.rdy(rdy),
 		.pc_i(ex_pc),.jmp_status_i(ex_jmp_status),
 		.aluop_i(ex_aluop_i),.alusel_i(ex_alusel_i),
 		.reg1_i(ex_reg1_i),.reg2_i(ex_reg2_i),
@@ -219,7 +220,7 @@ ex ex0(.rst(rst),
 		.load_status(ex_ld_status));
 
 //ex_mem
-ex_mem ex_mem0(.clk(clk_in),.rst(rst),
+ex_mem ex_mem0(.clk(clk_in),.rst(rst),.rdy(rdy),
 		.ex_wd(ex_wd_o),.ex_wreg(ex_wreg_o),.ex_wdata(ex_wdata_o),
 		.ex_mem_addr(ex_mem_addr),.ex_aluop(ex_aluop_o),
 		.stall(stall),
@@ -227,7 +228,7 @@ ex_mem ex_mem0(.clk(clk_in),.rst(rst),
 		.mem_mem_addr(mem_mem_addr),.mem_aluop(mem_aluop_i));
 
 //mem
-mem mem0(.rst(rst),
+mem mem0(.rst(rst),.rdy(rdy),
 		.wd_i(mem_wd_i),.wreg_i(mem_wreg_i),.wdata_i(mem_wdata_i),
 		.aluop_i(mem_aluop_i),.addr_i(mem_mem_addr),
 		.wd_o(mem_wd_o),.wreg_o(mem_wreg_o),.wdata_o(mem_wdata_o),
@@ -238,13 +239,13 @@ mem mem0(.rst(rst),
 		.mem_stall(mem_stall));
 
 //mem_wb
-mem_wb mem_wb0(.clk(clk_in),.rst(rst),
+mem_wb mem_wb0(.clk(clk_in),.rst(rst),.rdy(rdy),
 		.mem_wd(mem_wd_o),.mem_wreg(mem_wreg_o),.mem_wdata(mem_wdata_o),
 		.stall(stall),
 		.wb_wd(wb_wd_i),.wb_wreg(wb_wreg_i),.wb_wdata(wb_wdata_i));
 
 //mem_ctrl
-mem_ctrl mem_ctrl0(.clk(clk_in),.rst(rst),
+mem_ctrl mem_ctrl0(.clk(clk_in),.rst(rst),.rdy(rdy),
 		.ex_jmp_wrong_i(ex_jmp_wrong),
 		.inst_require(mc_inst_require),.inst_addr(mc_inst_addr),
 		.inst_data(mc_inst_data),.inst_enable(mc_inst_enable),.inst_busy(mc_inst_busy),
@@ -256,7 +257,7 @@ mem_ctrl mem_ctrl0(.clk(clk_in),.rst(rst),
 		.ram_addr(mem_a),.ram_wr(mem_wr),.io_buffer_full(io_buffer_full));
 
 //stall_ctrl
-ctrl ctrl0(.rst(rst),
+ctrl ctrl0(.rst(rst),.rdy(rdy),
 		.if_stall(if_stall),.id_stall(id_stall),
 		.mem_stall(mem_stall),.stall(stall));
 

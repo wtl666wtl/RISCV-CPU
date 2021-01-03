@@ -1,7 +1,7 @@
 module mem_ctrl(
 	input wire clk,
 	input wire rst,
-	
+	input wire rdy,
 	input ex_jmp_wrong_i,
 	
 	//interact with icache
@@ -51,7 +51,7 @@ assign ram_addr=(io_buffer_full&&wr)?`ZeroWord:addr+counter;
 assign ram_out=(counter==3'b100)?`ZeroWord:sdata[counter];
 
 always @(posedge clk)begin
-	if(rst==`RstEnable||(ex_jmp_wrong_i&&!mem_require))begin
+	if(rst==`RstEnable||(rdy&&ex_jmp_wrong_i&&!mem_require))begin
 		counter<=0;
 		mem_busy<=`False;
 		inst_busy<=`False;
@@ -61,52 +61,54 @@ always @(posedge clk)begin
 		ldata[1]<=0;
 		ldata[2]<=0;
 		ldata[3]<=0;
-	end else if(length&&!wr)begin
-		if(counter==0)begin
-			inst_busy<=mem_require;
-			mem_busy<=!mem_require;
-			inst_enable<=`False;
-			mem_enable<=`False;
-			counter<=counter+1;
-		end else if(counter<length)begin
-			counter<=counter+1;
-			ldata[counter-1]=ram_in;
-		end else begin
-			if(mem_require==`True)begin
-			    mem_enable<=`True;
-				if(mem_length==3'b001)begin
-					mem_data_o<=ram_in;
-				end else if(mem_length==3'b010)begin
-					mem_data_o<={ram_in,ldata[0]};
-				end else if(mem_length==3'b100)begin
-					mem_data_o<={ram_in,ldata[2],ldata[1],ldata[0]};
-				end
+	end else if(rdy) begin
+		if(length&&!wr)begin
+			if(counter==0)begin
+				inst_busy<=mem_require;
+				mem_busy<=!mem_require;
+				inst_enable<=`False;
+				mem_enable<=`False;
+				counter<=counter+1;
+			end else if(counter<length)begin
+				counter<=counter+1;
+				ldata[counter-1]=ram_in;
 			end else begin
-				inst_data<={ram_in,ldata[2],ldata[1],ldata[0]};
-				inst_enable<=`True;
+				if(mem_require==`True)begin
+				    mem_enable<=`True;
+					if(mem_length==3'b001)begin
+						mem_data_o<=ram_in;
+					end else if(mem_length==3'b010)begin
+						mem_data_o<={ram_in,ldata[0]};
+					end else if(mem_length==3'b100)begin
+						mem_data_o<={ram_in,ldata[2],ldata[1],ldata[0]};
+					end
+				end else begin
+					inst_data<={ram_in,ldata[2],ldata[1],ldata[0]};
+					inst_enable<=`True;
+				end
+				counter<=0;
 			end
-			counter<=0;
-		end
-	end else if(length&&wr)begin
-		if(counter==0)begin
-			inst_busy<=`True;
-			mem_busy<=`False;
-			inst_enable<=`False;
-			mem_enable<=`False;
-		end
-    if(!io_buffer_full)begin
-		if(counter+1==length)begin
-			mem_enable<=`True;
-			counter<=0;
+		end else if(length&&wr)begin
+			if(counter==0)begin
+				inst_busy<=`True;
+				mem_busy<=`False;
+				inst_enable<=`False;
+				mem_enable<=`False;
+			end
+    			if(!io_buffer_full)begin
+				if(counter+1==length)begin
+					mem_enable<=`True;
+					counter<=0;
+				end else begin
+					counter<=counter+1;
+				end
+	 		end
 		end else begin
-			counter<=counter+1;
+			mem_busy<=`False;
+			inst_busy<=`False;
+			mem_enable<=`False;
+			inst_enable<=`False;
 		end
-	 end
-	end else begin
-		mem_busy<=`False;
-		inst_busy<=`False;
-		mem_enable<=`False;
-		inst_enable<=`False;
 	end
 end
 
