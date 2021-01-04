@@ -10,7 +10,7 @@ module ctrl(
 always @(*) begin
 	if(rst==`RstEnable) begin
 		stall=`AllStall;
-	end else if(rdy) begin
+	end else begin
 		if(mem_stall==`Stop)begin
 			stall=`MemStall;
 		end else if(id_stall==`Stop)begin

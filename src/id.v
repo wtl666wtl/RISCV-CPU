@@ -68,7 +68,7 @@ always @(*) begin
 		//offset_o=`ZeroWord;
 		pc_o=`ZeroWord;
 		jmp_status_o=`False;
-	end else if(rdy) begin
+	end else begin
 		aluop_o=`EX_NOP;
 		alusel_o=`EX_RES_NOP;
 		wd_o=rd;
@@ -469,7 +469,7 @@ always @(*) begin
     reg1_stall=1'b0;
 	if(rst==`RstEnable) begin
 		reg1_o=`ZeroWord;
-	end if(rdy) begin
+	end begin
 		if((reg1_read_o==1'b1)&&(ex_ld_status==1'b1)&&(ex_wd_i==reg1_addr_o)) begin
 			reg1_o=`ZeroWord;
 			reg1_stall=1'b1;
@@ -492,7 +492,7 @@ always @(*) begin
     reg2_stall=1'b0;
 	if(rst==`RstEnable) begin
 		reg2_o=`ZeroWord;
-	end if(rdy) begin
+	end begin
 		if((reg2_read_o==1'b1)&&(ex_ld_status==1'b1)&&(ex_wd_i==reg2_addr_o)) begin
 			reg2_o=`ZeroWord;
 			reg2_stall=1'b1;

@@ -44,7 +44,7 @@ always @(*)begin
 	if(rst==`RstEnable)begin
 		pre_jmp_status=`False;
 		pre_jmp_target=`ZeroWord;
-	end else if(rdy)begin
+	end else begin
 		if(tag[pc_if[`IndexBus]]==pc_if[`TagBits]&&pre[pc_if[`IndexBus]][1]==`True)begin
 			pre_jmp_status=`True;
 			pre_jmp_target=target[pc_if[`IndexBus]];

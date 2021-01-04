@@ -40,7 +40,7 @@ always @(*) begin
 		inst_require_o=`False;
 		inst_enable_o=`False;
 		inst_data_o=`ZeroWord;
-	end else if(rdy)begin
+	end else begin
 		if(tag[inst_addr_i[`IndexBus]]==inst_addr_i[`TagBits])begin
 			inst_enable_o=`True;
 			inst_data_o=data[inst_addr_i[`IndexBus]];

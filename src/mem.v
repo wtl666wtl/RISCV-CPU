@@ -38,7 +38,7 @@ always @(*) begin
 		wd_o=`NOPRegAddr;
 		wreg_o=`WriteDisable;
 		wdata_o=`ZeroWord;
-	end else if(rdy) begin
+	end else begin
 		mem_require_o=`False;
    		mem_wr_o=`False;
   	 	mem_data_o=`ZeroWord;

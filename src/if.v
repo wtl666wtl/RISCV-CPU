@@ -21,14 +21,14 @@ always @(*) begin
 	if(rst==`RstEnable)begin
 		pc_o=`ZeroWord;
 		inst_addr_o=`ZeroWord;
-	end else if(rdy) begin
+	end else begin
 		pc_o=pc_i;
 		inst_addr_o=pc_i;
 	end
-	if(rdy&&rst!=`RstEnable&&inst_enable_i)begin
+	if(rst!=`RstEnable&&inst_enable_i)begin
 		inst_o=inst_data_i;
 	end else begin
-		if(rst)inst_o=`ZeroWord;
+		inst_o=`ZeroWord;
 	end
 end
 

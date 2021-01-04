@@ -28,8 +28,8 @@ always @(posedge clk) begin
 		if((we==`WriteEnable)&&(waddr!=`RegNumLog2'h0)) begin
 			regs[waddr]<=wdata;
 		end
-	end else begin
-		for(i=0;i<`RegNum;i=i+1)regs[i]=`ZeroWord;
+	end else if(rdy) begin
+		for(i=0;i<`RegNum;i=i+1)regs[i]<=`ZeroWord;
 	end
 end
 
@@ -37,7 +37,7 @@ end
 always @(*) begin
 	if(rst==`RstEnable) begin
 		rdata1<=`ZeroWord;
-	end else if(rdy) begin
+	end else begin
 		if(raddr1==`RegNumLog2'h0) begin
 			rdata1<=`ZeroWord;
 		end else if((raddr1==waddr)&&(we==`WriteEnable)&&(re1==`ReadEnable)) begin
@@ -54,7 +54,7 @@ end
 always @(*) begin
 	if(rst==`RstEnable) begin
 		rdata2<=`ZeroWord;
-	end else if(rdy) begin
+	end else begin
 		if(raddr2==`RegNumLog2'h0) begin
 			rdata2<=`ZeroWord;
 		end else if((raddr2==waddr)&&(we==`WriteEnable)&&(re2==`ReadEnable)) begin
